@@ -1,0 +1,92 @@
+# Example MentalModel.toml for a CLI tool
+
+[meta]
+version = "1.0"
+name = "devctl"
+description = "CLI tool for managing development environments and deployments"
+repository = "https://github.com/acme/devctl"
+last_updated = "2024-01-15"
+
+[context]
+purpose = "Simplify development workflow and deployment automation"
+key_decisions = [
+    "Cobra for CLI framework",
+    "YAML for configuration",
+    "Plugin architecture for extensibility",
+    "Shell completion support"
+]
+non_goals = ["GUI interface", "Windows support", "Cloud hosting"]
+tech_stack = ["Go", "Cobra", "Viper", "Docker SDK"]
+
+[structure]
+main_entry = "cmd/devctl/main.go"
+
+[structure.layout]
+"cmd/devctl/" = "Main CLI entry point"
+"internal/commands/" = "Command implementations"
+"internal/config/" = "Configuration management"
+"internal/docker/" = "Docker integration"
+"pkg/plugin/" = "Plugin system"
+"scripts/" = "Build and release scripts"
+
+[structure.patterns]
+test_pattern = "*_test.go in same directory as source"
+naming = "lowercase with underscores for files"
+grouping = "by-feature"
+
+[components.commands]
+purpose = "CLI command implementations"
+stability = "stable"
+
+[components.commands.files]
+entry = "internal/commands/root.go"
+implementation = [
+    "internal/commands/init.go",
+    "internal/commands/deploy.go",
+    "internal/commands/status.go",
+    "internal/commands/logs.go"
+]
+tests = ["internal/commands/*_test.go"]
+
+[components.plugin_system]
+purpose = "Dynamic plugin loading and execution"
+stability = "experimental"
+
+[components.plugin_system.notes]
+constraints = ["Plugins must be Go binaries"]
+assumptions = ["Plugins in ~/.devctl/plugins/"]
+gotchas = ["Plugin API changes require version bump"]
+
+[important_notes.performance]
+hot_paths = ["Command parsing must be instant", "Config loading <50ms"]
+optimization_targets = ["Minimize startup time", "Lazy load plugins"]
+
+[important_notes.constraints]
+determinism = "Same inputs must produce same outputs"
+concurrency = "Support parallel deployments"
+
+[important_notes.development]
+setup_gotchas = [
+    "Requires Go 1.21+",
+    "Must run 'make generate' after proto changes"
+]
+debugging = ["Use DEVCTL_DEBUG=1 for verbose output"]
+
+[test_coverage]
+overall = 78
+approach = "Focus on command logic, mock external services"
+
+[evolution.technical_debt]
+high = ["Plugin versioning system needed"]
+medium = ["Refactor config validation"]
+
+[quick_start]
+setup = """
+1. Clone repository
+2. Run: make build
+3. Run: ./bin/devctl init
+"""
+understand_first = [
+    "cmd/devctl/main.go - Entry point",
+    "internal/commands/root.go - Command structure"
+]

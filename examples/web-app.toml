@@ -1,0 +1,264 @@
+# Example MentalModel.toml for a typical web application
+
+[meta]
+version = "1.0"
+name = "acme-store"
+description = "E-commerce platform with real-time inventory tracking and personalized recommendations"
+repository = "https://github.com/acme/store"
+last_updated = "2024-01-15"
+
+[context]
+purpose = "Provide fast, reliable online shopping with real-time inventory"
+key_decisions = [
+    "Microservices for independent scaling",
+    "Event-driven inventory updates via Kafka",
+    "PostgreSQL for transactions, Redis for sessions",
+    "React with server-side rendering for SEO"
+]
+non_goals = ["Physical store management", "B2B wholesale", "Manufacturing"]
+tech_stack = ["Node.js", "PostgreSQL", "Redis", "Kafka", "React", "Next.js"]
+
+[structure]
+main_entry = "src/server/index.js"
+
+[structure.layout]
+"src/server/" = "Backend API and business logic"
+"src/client/" = "Frontend React application"
+"src/shared/" = "Shared types and utilities"
+"tests/" = "All test files (mirrors src structure)"
+"scripts/" = "Build and deployment scripts"
+"config/" = "Environment configurations"
+
+[structure.patterns]
+test_pattern = "tests/ mirrors src/ with .test.js suffix"
+naming = "kebab-case for files, PascalCase for components"
+grouping = "by-feature"
+
+[components.auth]
+purpose = "Handle user authentication and authorization"
+stability = "stable"
+
+[components.auth.files]
+entry = "src/server/auth/index.js"
+implementation = [
+    "src/server/auth/jwt.js",
+    "src/server/auth/oauth.js",
+    "src/server/auth/middleware.js"
+]
+tests = ["tests/server/auth/*.test.js"]
+config = "config/auth.json"
+
+[components.auth.interface]
+public_api = [
+    "POST /api/auth/login",
+    "POST /api/auth/logout",
+    "POST /api/auth/refresh",
+    "GET /api/auth/profile"
+]
+internal_functions = ["verifyToken", "generateTokenPair", "checkPermissions"]
+events_published = ["user.login", "user.logout", "token.refreshed"]
+
+[components.auth.dependencies]
+internal = ["database", "cache", "notification"]
+external = ["jsonwebtoken", "bcrypt", "passport"]
+services = ["PostgreSQL", "Redis"]
+
+[components.auth.testing]
+coverage = 94
+critical_paths = ["Login flow", "Token validation", "Permission checks"]
+missing_tests = ["OAuth error handling"]
+
+[components.auth.state]
+health = "good"
+tech_debt = ["Migrate to asymmetric JWT keys"]
+recent_changes = ["2024-01-10: Added 2FA support"]
+
+[components.inventory]
+purpose = "Real-time inventory tracking and reservation"
+stability = "stable"
+
+[components.inventory.files]
+entry = "src/server/inventory/index.js"
+implementation = [
+    "src/server/inventory/tracker.js",
+    "src/server/inventory/reservation.js",
+    "src/server/inventory/events.js"
+]
+
+[components.inventory.dependencies]
+internal = ["database", "messaging"]
+external = ["kafkajs"]
+services = ["PostgreSQL", "Kafka"]
+
+[components.inventory.notes]
+constraints = ["Inventory updates must be processed within 100ms"]
+assumptions = ["Single source of truth is warehouse system"]
+gotchas = ["Reservations expire after 15 minutes if not confirmed"]
+
+[components.checkout]
+purpose = "Shopping cart and payment processing"
+stability = "needs-attention"
+
+[components.checkout.state]
+health = "needs-attention"
+tech_debt = [
+    "Payment retry logic needs refactoring",
+    "Cart persistence doesn't handle concurrent updates well"
+]
+
+[important_notes.performance]
+hot_paths = [
+    "Auth token validation must be <10ms",
+    "Product search must return in <200ms",
+    "Checkout flow must complete in <3s"
+]
+bottlenecks = [
+    "Database connection pool limited to 20",
+    "Redis max connections: 100",
+    "Image CDN rate limit: 1000 req/s"
+]
+optimization_targets = ["Minimize database queries", "Cache frequently accessed data"]
+
+[important_notes.constraints]
+determinism = "Inventory calculations must be deterministic"
+concurrency = "Handle 1000 concurrent users minimum"
+memory = "Node process limited to 2GB RAM"
+latency = "API responses must be <500ms p95"
+
+[important_notes.environment]
+deployment = "Kubernetes on AWS EKS"
+hardware = "t3.large instances for API, db.r5.xlarge for PostgreSQL"
+os_specific = ["Linux containers only"]
+
+[important_notes.critical]
+security = [
+    "All user input sanitized in middleware",
+    "JWT tokens expire in 15 minutes",
+    "PII encrypted at rest",
+    "Rate limiting: 100 requests/minute per IP"
+]
+data_integrity = [
+    "All monetary transactions use database transactions",
+    "Inventory updates are idempotent",
+    "Soft deletes only for audit trail"
+]
+failure_modes = [
+    "Database down: Read-only mode with cached data",
+    "Kafka down: Queue updates locally, process when restored",
+    "Redis down: Fallback to database sessions (degraded performance)"
+]
+recovery = [
+    "Database: Automated failover to replica",
+    "Application: Rolling restart via Kubernetes",
+    "Data corruption: Point-in-time recovery from backups"
+]
+
+[important_notes.development]
+setup_gotchas = [
+    "Requires Node 18+",
+    "Must run 'npm run db:migrate' before first start",
+    "Local Kafka requires Docker"
+]
+debugging = [
+    "Enable DEBUG=app:* for verbose logging",
+    "Use Chrome DevTools for Node debugging",
+    "Kafka messages visible in Kafdrop UI"
+]
+testing = [
+    "Integration tests require test database",
+    "Use npm run test:watch for TDD",
+    "E2E tests need HEADLESS=false for debugging"
+]
+
+[test_coverage]
+overall = 87
+approach = "Test critical paths thoroughly, mock external services"
+
+[test_coverage.by_type]
+unit = { files = 145, coverage = 92 }
+integration = { files = 34, coverage = 78 }
+e2e = { files = 12, coverage = 65 }
+
+[test_coverage.critical_paths]
+"checkout_flow" = { coverage = 95, files = ["tests/e2e/checkout.test.js"] }
+"auth_flow" = { coverage = 94, files = ["tests/integration/auth.test.js"] }
+"inventory_sync" = { coverage = 88, files = ["tests/integration/inventory.test.js"] }
+
+[test_coverage.gaps]
+"payment_webhooks" = "No tests for payment provider webhooks"
+"admin_features" = "Limited coverage for admin dashboard"
+
+[test_coverage.running]
+all = "npm test"
+unit = "npm run test:unit"
+integration = "npm run test:integration"
+e2e = "npm run test:e2e"
+
+[[evolution.changes]]
+date = "2024-01-15"
+what = "Added real-time inventory tracking"
+why = "Reduce overselling during flash sales"
+outcome = "Success"
+files_affected = ["src/server/inventory/*", "src/client/components/ProductStock.jsx"]
+learnings = "Event sourcing works well for inventory"
+
+[[evolution.changes]]
+date = "2024-01-10"
+what = "Implemented 2FA for user accounts"
+why = "Security compliance requirement"
+outcome = "Success"
+files_affected = ["src/server/auth/twofa.js"]
+
+[[evolution.changes]]
+date = "2023-12-20"
+what = "Migrated from Express to Fastify"
+why = "Better performance and schema validation"
+outcome = "Success"
+learnings = "20% reduction in response times"
+
+[evolution.attempted_approaches]
+"caching" = [
+    "Tried caching entire product catalog in Redis - too memory intensive",
+    "Attempted GraphQL DataLoader - added too much complexity"
+]
+"search" = [
+    "PostgreSQL full-text search - too slow for our dataset",
+    "Elasticsearch - worked but operational overhead too high, stayed with Algolia"
+]
+
+[evolution.technical_debt]
+high = [
+    "Payment processing needs retry mechanism",
+    "Session management should move to JWT completely"
+]
+medium = [
+    "Consolidate notification services",
+    "Refactor product search to use composition"
+]
+low = [
+    "Update deprecated npm packages",
+    "Remove unused API endpoints"
+]
+
+[quick_start]
+setup = """
+1. Clone repository
+2. Copy .env.example to .env
+3. Run: docker-compose up -d (for PostgreSQL, Redis, Kafka)
+4. Run: npm install
+5. Run: npm run db:migrate
+6. Run: npm run dev
+7. Open http://localhost:3000
+"""
+understand_first = [
+    "src/server/index.js - Main entry point",
+    "docs/ARCHITECTURE.md - System design",
+    "src/server/auth/middleware.js - Request flow"
+]
+
+[quick_start.common_tasks]
+"add new API endpoint" = "Create handler in src/server/api/, add route in routes.js"
+"modify database schema" = "Create migration in migrations/, run npm run db:migrate"
+"add React component" = "Create in src/client/components/, add story in .stories.js"
+"run specific test" = "npm test -- --grep 'test description'"
+"check bundle size" = "npm run build:analyze"

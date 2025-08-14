@@ -1,0 +1,122 @@
+# Example MentalModel.toml for a Python ML project
+
+[meta]
+version = "1.0"
+name = "fraud-detector"
+description = "Real-time fraud detection system using ensemble machine learning models"
+repository = "https://github.com/acme/fraud-detector"
+last_updated = "2024-01-15"
+
+[context]
+purpose = "Detect fraudulent transactions in real-time with high precision"
+key_decisions = [
+    "Ensemble approach for better accuracy",
+    "Feature store for consistent features",
+    "MLflow for experiment tracking",
+    "Real-time inference via FastAPI"
+]
+non_goals = ["Training UI", "Data labeling", "Historical analysis"]
+tech_stack = ["Python", "scikit-learn", "XGBoost", "FastAPI", "Redis", "PostgreSQL"]
+
+[structure]
+main_entry = "src/api/main.py"
+
+[structure.layout]
+"src/models/" = "Model training and evaluation"
+"src/features/" = "Feature engineering pipeline"
+"src/api/" = "Inference API service"
+"src/data/" = "Data loading and preprocessing"
+"notebooks/" = "Exploratory data analysis"
+"tests/" = "Unit and integration tests"
+"configs/" = "Model and training configurations"
+
+[structure.patterns]
+test_pattern = "tests/ mirrors src/ with test_ prefix"
+naming = "snake_case for all Python files"
+grouping = "by-layer"
+
+[components.feature_pipeline]
+purpose = "Transform raw data into ML features"
+stability = "stable"
+
+[components.feature_pipeline.files]
+entry = "src/features/pipeline.py"
+implementation = [
+    "src/features/transformers.py",
+    "src/features/aggregations.py",
+    "src/features/encoders.py"
+]
+
+[components.feature_pipeline.notes]
+constraints = ["Feature computation must be <50ms"]
+gotchas = ["Feature versions must match between training and inference"]
+
+[components.model_ensemble]
+purpose = "Combine multiple models for better predictions"
+stability = "stable"
+
+[components.model_ensemble.files]
+entry = "src/models/ensemble.py"
+implementation = [
+    "src/models/xgboost_model.py",
+    "src/models/neural_net.py",
+    "src/models/random_forest.py"
+]
+
+[components.inference_api]
+purpose = "REST API for real-time predictions"
+stability = "stable"
+
+[components.inference_api.interface]
+public_api = [
+    "POST /predict - Single prediction",
+    "POST /batch_predict - Batch predictions",
+    "GET /health - Service health",
+    "GET /model/info - Model metadata"
+]
+
+[important_notes.performance]
+hot_paths = [
+    "Feature generation must complete in <50ms",
+    "Model inference must be <100ms",
+    "API response time <200ms total"
+]
+bottlenecks = ["Feature store Redis connection pool: 50"]
+
+[important_notes.constraints]
+determinism = "Same features must produce same predictions"
+memory = "Model ensemble limited to 4GB RAM"
+
+[important_notes.critical]
+data_integrity = [
+    "Feature drift monitored hourly",
+    "Model performance tracked in MLflow",
+    "Predictions logged for audit"
+]
+
+[test_coverage]
+overall = 82
+approach = "Test feature engineering thoroughly, mock model predictions"
+
+[test_coverage.by_type]
+unit = { files = 45, coverage = 88 }
+integration = { files = 12, coverage = 71 }
+
+[evolution.technical_debt]
+high = ["Need online learning capability"]
+medium = ["Refactor feature store interface"]
+
+[quick_start]
+setup = """
+1. Clone repository
+2. Create virtual environment: python -m venv venv
+3. Activate: source venv/bin/activate
+4. Install: pip install -e .[dev]
+5. Download models: python scripts/download_models.py
+6. Run API: uvicorn src.api.main:app --reload
+"""
+understand_first = [
+    "src/features/pipeline.py - Feature engineering",
+    "src/models/ensemble.py - Model combination logic",
+    "notebooks/eda.ipynb - Data exploration"
+]
