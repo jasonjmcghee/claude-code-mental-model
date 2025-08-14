@@ -190,16 +190,22 @@ Based on the argument provided: $ARGUMENTS
 ### If "update":
 
 1. Read existing MentalModel.toml
-2. Check for structural changes:
-   - New files or directories
-   - Moved or renamed files
-   - New dependencies
-3. Update relevant sections:
+2. Get the last_updated date from the file
+3. Use git to analyze changes since then:
+   - Run `git log --since="YYYY-MM-DD" --name-status --pretty=format:"%h %s"` to see commits and file changes
+   - Run `git diff --stat HEAD@{YYYY-MM-DD}..HEAD` to see overall changes
+   - Identify new files, moved files, deleted files, and significantly modified files
+4. Check for structural changes:
+   - New files or directories from git history
+   - Moved or renamed files (git detects these)
+   - New dependencies in package files
+   - New components or services
+5. Update relevant sections based on git findings:
    - Component file mappings
    - Test coverage if changed significantly
-   - Evolution tracking for major changes
-   - Last_updated timestamp
-4. Preserve existing critical knowledge while adding new findings
+   - Evolution tracking for major changes from git log
+   - Update last_updated timestamp to today
+6. Preserve existing critical knowledge while adding new findings from git history
 
 ### If "query [component]":
 

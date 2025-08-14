@@ -21,14 +21,14 @@ Generate a MentalModel.toml:
 > /mental-model generate
 ```
 
-Update it when things change:
+(Optional) Manually request an update when things change (e.g. when Claude did not make the changes):
 ```
 > /mental-model update
 ```
 
 Claude reads it on startup and knows your codebase structure.
 
-## What's in MentalModel.toml?
+## What's in `MentalModel.toml`?
 
 - Components and their relationships
 - File structure and entry points
