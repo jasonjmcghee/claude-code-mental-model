@@ -2,6 +2,8 @@
 
 A structured file that helps Claude understand your codebase architecture using a single TOML file that gets read on startup.
 
+Claude will automatically read and maintain the file if it exists in the project.
+
 ## Install
 
 ```bash
