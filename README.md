@@ -1,4 +1,4 @@
-# MentalModel.toml for Claude Code
+# Claude Code Mental Model
 
 A structured file that helps Claude understand your codebase architecture using a single TOML file that gets read on startup.
 
